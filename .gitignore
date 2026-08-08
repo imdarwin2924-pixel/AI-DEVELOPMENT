@@ -1,4 +1,22 @@
-.env
+# Virtual environment
 .venv/
+venv/
+env/
+
+# Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+
+# Environment / secrets
+.env
+.env.*
+
+# Logs
+logs/
+
+# Test/cache files
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/

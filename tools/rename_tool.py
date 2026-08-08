@@ -1,23 +1,21 @@
-"""
-Rename Tool
-
-Currently runs in DRY RUN mode.
-No files are actually renamed.
-"""
+from pathlib import Path
 
 
 class RenameTool:
 
-    def execute(self, old_name, new_name):
+    def execute(self, source_folder, old_name, new_name):
 
-        print("\n[DRY RUN]")
-        print(f"Rename File : {old_name}")
-        print(f"New Name    : {new_name}")
+        source = Path(source_folder) / old_name
+        destination = Path(source_folder) / new_name
+
+        source.rename(destination)
+
+        print(f"\n✔ Renamed {old_name} → {new_name}")
 
         return {
             "status": "success",
             "action": "rename",
             "old_name": old_name,
             "new_name": new_name,
-            "dry_run": True
+            "dry_run": False
         }

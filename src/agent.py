@@ -2,6 +2,10 @@ from src.perceive import perceive
 from src.planner import Planner
 from src.executor import Executor
 from src.logger import log_iteration
+from src.observer import Observer
+from src.loop_controller import LoopController
+from src.plan_validator import PlanValidator
+from src.memory import AgentMemory
 
 
 class DirectoryCleanupAgent:
@@ -9,10 +13,51 @@ class DirectoryCleanupAgent:
     def __init__(self, folder_path):
 
         self.folder_path = folder_path
-        self.iteration = 1
+        self.iteration = 0
 
-        self.planner = Planner()
+        # ==================================
+        # MEMORY
+        # ==================================
+
+        self.memory = AgentMemory(
+            "logs/memory.json"
+        )
+
+        # ==================================
+        # PLANNER
+        # ==================================
+
+        self.planner = Planner(
+            memory=self.memory
+        )
+
+        # ==================================
+        # EXECUTOR
+        # ==================================
+
         self.executor = Executor()
+
+        # ==================================
+        # OBSERVER
+        # ==================================
+
+        self.observer = Observer(
+            memory=self.memory
+        )
+
+        # ==================================
+        # LOOP CONTROLLER
+        # ==================================
+
+        self.loop_controller = LoopController(
+            max_iterations=5
+        )
+
+        # ==================================
+        # PLAN VALIDATOR
+        # ==================================
+
+        self.validator = PlanValidator()
 
     def run(self):
 
@@ -20,80 +65,313 @@ class DirectoryCleanupAgent:
         print("        DIRECTORY CLEAN-UP AGENT")
         print("=" * 60)
 
-        try:
+        # ==================================
+        # AGENT LOOP
+        # ==================================
 
-            # ==================================
-            # PERCEIVE
-            # ==================================
+        while self.loop_controller.can_continue():
 
-            files = perceive(self.folder_path)
+            self.loop_controller.start_iteration()
 
-            log_iteration(
-                iteration=self.iteration,
-                stage="Perceive",
-                status="Success",
-                details=f"Found {len(files)} files."
-            )
+            self.iteration = self.loop_controller.current_iteration
 
-            # ==================================
-            # PLAN
-            # ==================================
+            try:
 
-            print("\n========== PLAN STAGE ==========\n")
+                # ==================================
+                # PERCEIVE
+                # ==================================
 
-            plan = self.planner.generate_plan(files)
+                files = perceive(self.folder_path)
 
-            print("Cleanup Plan\n")
+                log_iteration(
+                    iteration=self.iteration,
+                    stage="Perceive",
+                    status="Success",
+                    details=f"Found {len(files)} files."
+                )
 
-            for item in plan:
+                # ==================================
+                # SUCCESS CONDITION - EMPTY FOLDER
+                # ==================================
 
-                print("-----------------------------------")
-                print(f"File        : {item['file']}")
-                print(f"Action      : {item['action']}")
-                print(f"Destination : {item.get('destination', '')}")
-                print(f"Reason      : {item['reason']}")
+                if not files:
 
-            log_iteration(
-                iteration=self.iteration,
-                stage="Plan",
-                status="Success",
-                details=f"Generated {len(plan)} actions."
-            )
+                    print("\n" + "=" * 50)
+                    print("CLEANUP COMPLETED SUCCESSFULLY")
+                    print("=" * 50)
+                    print("No files remaining to process.")
 
-            # ==================================
-            # ACT
-            # ==================================
+                    log_iteration(
+                        iteration=self.iteration,
+                        stage="Agent Loop",
+                        status="Completed",
+                        details="No files remaining in the folder."
+                    )
 
-            results = self.executor.execute_plan(plan)
+                    return []
 
-            log_iteration(
-                iteration=self.iteration,
-                stage="Act",
-                status="Success",
-                details=f"Executed {len(results)} dry-run actions."
-            )
+                # ==================================
+                # PLAN
+                # ==================================
 
-            # ==================================
-            # SUMMARY
-            # ==================================
+                print("\n========== PLAN STAGE ==========\n")
 
-            print("\n========== SUMMARY ==========\n")
+                plan = self.planner.generate_plan(files)
 
-            for result in results:
+                print("Cleanup Plan\n")
 
-                print(result)
+                for item in plan:
 
-            return results
+                    print("-----------------------------------")
+                    print(f"File        : {item['file']}")
+                    print(f"Action      : {item['action']}")
+                    print(f"Destination : {item.get('destination', '')}")
+                    print(f"Reason      : {item['reason']}")
 
-        except Exception as error:
+                log_iteration(
+                    iteration=self.iteration,
+                    stage="Plan",
+                    status="Success",
+                    details=f"Generated {len(plan)} actions."
+                )
+                # ==================================
+                # VALIDATE PLAN
+                # ==================================
 
-            log_iteration(
-                iteration=self.iteration,
-                stage="Agent",
-                status="Failed",
-                details=str(error)
-            )
+                print("\n========== VALIDATION STAGE ==========\n")
 
-            print(f"\nError : {error}")
+                validation = self.validator.validate(
+                    plan=plan,
+                    source_folder=self.folder_path
+                )
 
-            return []
+                if not validation["valid"]:
+
+                    print("❌ Plan validation failed.")
+
+                    for error in validation["errors"]:
+
+                        print(f"   - {error}")
+
+                    log_iteration(
+                        iteration=self.iteration,
+                        stage="Validate",
+                        status="Failed",
+                        details="; ".join(validation["errors"])
+                    )
+
+                    return []
+                    
+                print("✅ Plan validation passed.")
+
+                log_iteration(
+                    iteration=self.iteration,
+                    stage="Validate",
+                    status="Success",
+                    details="Plan validation passed."
+                )
+                # ==================================
+                # CONFIRMATION
+                # ==================================
+
+                print("\n" + "=" * 50)
+                print("CONFIRMATION")
+                print("=" * 50)
+
+                choice = input(
+                    "\nApply these changes? (yes/no): "
+                ).strip().lower()
+
+                if choice not in ("yes", "y"):
+
+                    print("\nExecution cancelled by user.")
+
+                    log_iteration(
+                        iteration=self.iteration,
+                        stage="Act",
+                        status="Cancelled",
+                        details="User cancelled execution."
+                    )
+
+                    return []
+
+                # ==================================
+                # ACT
+                # ==================================
+
+                print("\nExecuting cleanup...\n")
+
+                results = self.executor.execute_plan(
+                    plan=plan,
+                    source_folder=self.folder_path,
+                    dry_run=False
+                )
+
+                log_iteration(
+                    iteration=self.iteration,
+                    stage="Act",
+                    status="Success",
+                    details=f"Executed {len(results)} actions."
+                )
+
+                # ==================================
+                # OBSERVE
+                # ==================================
+
+                observations = self.observer.observe(
+                    source_folder=self.folder_path,
+                    results=results,
+                    iteration=self.iteration
+                )
+ 
+                self.observer.save_report(observations)
+
+                log_iteration(
+                    iteration=self.iteration,
+                    stage="Observe",
+                    status="Success",
+                    details=f"Verified {len(observations)} actions."
+                )
+
+                # ==================================
+                # EXECUTION SUMMARY
+                # ==================================
+
+                print("\n" + "=" * 50)
+                print("EXECUTION SUMMARY")
+                print("=" * 50)
+
+                success = 0
+                failed = 0
+                ignored = 0
+
+                for observation in observations:
+
+                    if observation["status"] == "verified":
+
+                        success += 1
+
+                    elif observation["status"] == "ignored":
+
+                        ignored += 1
+
+                    else:
+
+                        failed += 1
+
+                    print(observation)
+
+                print("\n" + "=" * 50)
+                print("FINAL REPORT")
+                print("=" * 50)
+
+                print(f"Total Actions : {len(results)}")
+                print(f"Successful    : {success}")
+                print(f"Ignored       : {ignored}")
+                print(f"Failed        : {failed}")
+
+                # ==================================
+                # LOOP DECISION
+                # ==================================
+
+                should_continue = (
+                    self.loop_controller.should_continue(
+                        observations
+                    )
+                )
+
+                # ==================================
+                # CLEANUP COMPLETED
+                # ==================================
+
+                if not should_continue:
+
+                    if self.loop_controller.is_cleanup_complete(
+                        observations
+                    ):
+
+                        print("\n" + "=" * 50)
+                        print("CLEANUP COMPLETED SUCCESSFULLY")
+                        print("=" * 50)
+
+                        log_iteration(
+                            iteration=self.iteration,
+                            stage="Agent Loop",
+                            status="Completed",
+                            details="Cleanup success condition satisfied."
+                        )
+
+                        return observations
+
+                    # ==================================
+                    # MAXIMUM ITERATIONS REACHED
+                    # ==================================
+
+                    if self.loop_controller.is_max_iterations_reached():
+
+                        print("\n" + "=" * 50)
+                        print("MAXIMUM ITERATIONS REACHED")
+                        print("=" * 50)
+
+                        log_iteration(
+                            iteration=self.iteration,
+                            stage="Agent Loop",
+                            status="Stopped",
+                            details="Maximum iteration limit reached."
+                        )
+
+                        return observations
+
+                # ==================================
+                # CONTINUE TO NEXT ITERATION
+                # ==================================
+
+                print("\n" + "=" * 50)
+                print("CLEANUP NOT COMPLETED")
+                print("=" * 50)
+
+                print("Failed actions detected.")
+
+                if self.loop_controller.can_continue():
+
+                    print("\nStarting next iteration...")
+
+            except Exception as error:
+
+                log_iteration(
+                    iteration=self.iteration,
+                    stage="Agent",
+                    status="Failed",
+                    details=str(error)
+                )
+
+                print(f"\nError : {error}")
+
+                # ==================================
+                # RETRY AFTER ERROR
+                # ==================================
+
+                if self.loop_controller.can_continue():
+
+                    print("\nAttempting another iteration...")
+
+                else:
+
+                    print("\nMaximum iterations reached.")
+
+        # ==================================
+        # MAXIMUM ITERATIONS REACHED
+        # ==================================
+
+        print("\n" + "=" * 50)
+        print("MAXIMUM ITERATIONS REACHED")
+        print("=" * 50)
+
+        log_iteration(
+            iteration=self.iteration,
+            stage="Agent Loop",
+            status="Stopped",
+            details="Maximum iteration limit reached."
+        )
+
+        return []

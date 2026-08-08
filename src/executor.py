@@ -11,56 +11,123 @@ class Executor:
         self.rename_tool = RenameTool()
         self.delete_tool = DeleteTool()
 
-    def execute_plan(self, plan):
+    def execute_plan(self, plan, source_folder, dry_run=True):
 
         results = []
 
-        print("\n========== ACT STAGE (DRY RUN) ==========\n")
+        print("\n========== ACT STAGE ==========\n")
 
         for action in plan:
 
             action_type = action.get("action", "").lower()
 
-            if action_type == "move":
+            try:
 
-                result = self.move_tool.execute(
-                    action["file"],
-                    action["destination"]
-                )
+                # --------------------------
+                # MOVE
+                # --------------------------
 
-            elif action_type == "rename":
+                if action_type == "move":
 
-                result = self.rename_tool.execute(
-                    action["file"],
-                    action["destination"]
-                )
+                    if dry_run:
 
-            elif action_type == "delete":
+                        print(f"[DRY RUN] Move {action['file']} -> {action['destination']}")
 
-                result = self.delete_tool.execute(
-                    action["file"]
-                )
+                        result = {
+                            "status": "success",
+                            "action": "move",
+                            "file": action["file"],
+                            "destination": action["destination"],
+                            "dry_run": True
+                        }
 
-            elif action_type == "ignore":
+                    else:
 
-                print(f"\n[IGNORE] {action['file']}")
+                        result = self.move_tool.execute(
+                            source_folder,
+                            action["file"],
+                            action["destination"]
+                        )
 
-                result = {
-                    "status": "ignored",
-                    "action": "ignore",
-                    "file": action["file"],
-                    "dry_run": True
-                }
+                # --------------------------
+                # RENAME
+                # --------------------------
 
-            else:
+                elif action_type == "rename":
 
-                print(f"\nUnknown action : {action_type}")
+                    if dry_run:
+
+                        print(f"[DRY RUN] Rename {action['file']} -> {action['destination']}")
+
+                        result = {
+                            "status": "success",
+                            "action": "rename",
+                            "file": action["file"],
+                            "destination": action["destination"],
+                            "dry_run": True
+                        }
+
+                    else:
+
+                        result = self.rename_tool.execute(
+                            source_folder,
+                            action["file"],
+                            action["destination"]
+                        )
+
+                # --------------------------
+                # DELETE
+                # --------------------------
+
+                elif action_type == "delete":
+
+                    if dry_run:
+
+                        print(f"[DRY RUN] Delete {action['file']}")
+
+                        result = {
+                            "status": "success",
+                            "action": "delete",
+                            "file": action["file"],
+                            "dry_run": True
+                        }
+
+                    else:
+
+                        result = self.delete_tool.execute(
+                            source_folder,
+                            action["file"]
+                        )
+
+                # --------------------------
+                # IGNORE
+                # --------------------------
+
+                elif action_type == "ignore":
+
+                    print(f"[IGNORE] {action['file']}")
+
+                    result = {
+                        "status": "ignored",
+                        "action": "ignore",
+                        "file": action["file"]
+                    }
+
+                else:
+
+                    result = {
+                        "status": "failed",
+                        "action": action_type,
+                        "file": action.get("file")
+                    }
+
+            except Exception as error:
 
                 result = {
                     "status": "failed",
                     "action": action_type,
                     "file": action.get("file"),
-                    "dry_run": True
+                    "error": str(error)
                 }
 
             results.append(result)
