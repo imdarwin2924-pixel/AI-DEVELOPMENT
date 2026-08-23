@@ -16,6 +16,13 @@ class DirectoryCleanupAgent:
         self.iteration = 0
 
         # ==================================
+        # ERROR RETRY CONTROL
+        # ==================================
+
+        self.error_retries = 0
+        self.max_error_retries = 2
+
+        # ==================================
         # MEMORY
         # ==================================
 
@@ -73,7 +80,9 @@ class DirectoryCleanupAgent:
 
             self.loop_controller.start_iteration()
 
-            self.iteration = self.loop_controller.current_iteration
+            self.iteration = (
+                self.loop_controller.current_iteration
+            )
 
             try:
 
@@ -81,7 +90,9 @@ class DirectoryCleanupAgent:
                 # PERCEIVE
                 # ==================================
 
-                files = perceive(self.folder_path)
+                files = perceive(
+                    self.folder_path
+                )
 
                 log_iteration(
                     iteration=self.iteration,
@@ -114,19 +125,32 @@ class DirectoryCleanupAgent:
                 # PLAN
                 # ==================================
 
-                print("\n========== PLAN STAGE ==========\n")
+                print(
+                    "\n========== PLAN STAGE ==========\n"
+                )
 
-                plan = self.planner.generate_plan(files)
+                plan = self.planner.generate_plan(
+                    files
+                )
 
                 print("Cleanup Plan\n")
 
                 for item in plan:
 
                     print("-----------------------------------")
-                    print(f"File        : {item['file']}")
-                    print(f"Action      : {item['action']}")
-                    print(f"Destination : {item.get('destination', '')}")
-                    print(f"Reason      : {item['reason']}")
+                    print(
+                        f"File        : {item['file']}"
+                    )
+                    print(
+                        f"Action      : {item['action']}"
+                    )
+                    print(
+                        f"Destination : "
+                        f"{item.get('destination', '')}"
+                    )
+                    print(
+                        f"Reason      : {item['reason']}"
+                    )
 
                 log_iteration(
                     iteration=self.iteration,
@@ -134,11 +158,14 @@ class DirectoryCleanupAgent:
                     status="Success",
                     details=f"Generated {len(plan)} actions."
                 )
+
                 # ==================================
                 # VALIDATE PLAN
                 # ==================================
 
-                print("\n========== VALIDATION STAGE ==========\n")
+                print(
+                    "\n========== VALIDATION STAGE ==========\n"
+                )
 
                 validation = self.validator.validate(
                     plan=plan,
@@ -147,22 +174,30 @@ class DirectoryCleanupAgent:
 
                 if not validation["valid"]:
 
-                    print("❌ Plan validation failed.")
+                    print(
+                        "❌ Plan validation failed."
+                    )
 
                     for error in validation["errors"]:
 
-                        print(f"   - {error}")
+                        print(
+                            f"   - {error}"
+                        )
 
                     log_iteration(
                         iteration=self.iteration,
                         stage="Validate",
                         status="Failed",
-                        details="; ".join(validation["errors"])
+                        details="; ".join(
+                            validation["errors"]
+                        )
                     )
 
                     return []
-                    
-                print("✅ Plan validation passed.")
+
+                print(
+                    "✅ Plan validation passed."
+                )
 
                 log_iteration(
                     iteration=self.iteration,
@@ -170,6 +205,13 @@ class DirectoryCleanupAgent:
                     status="Success",
                     details="Plan validation passed."
                 )
+
+                # ==================================
+                # RESET ERROR RETRY COUNTER
+                # ==================================
+
+                self.error_retries = 0
+
                 # ==================================
                 # CONFIRMATION
                 # ==================================
@@ -184,7 +226,9 @@ class DirectoryCleanupAgent:
 
                 if choice not in ("yes", "y"):
 
-                    print("\nExecution cancelled by user.")
+                    print(
+                        "\nExecution cancelled by user."
+                    )
 
                     log_iteration(
                         iteration=self.iteration,
@@ -199,7 +243,9 @@ class DirectoryCleanupAgent:
                 # ACT
                 # ==================================
 
-                print("\nExecuting cleanup...\n")
+                print(
+                    "\nExecuting cleanup...\n"
+                )
 
                 results = self.executor.execute_plan(
                     plan=plan,
@@ -223,8 +269,10 @@ class DirectoryCleanupAgent:
                     results=results,
                     iteration=self.iteration
                 )
- 
-                self.observer.save_report(observations)
+
+                self.observer.save_report(
+                    observations
+                )
 
                 log_iteration(
                     iteration=self.iteration,
@@ -265,10 +313,18 @@ class DirectoryCleanupAgent:
                 print("FINAL REPORT")
                 print("=" * 50)
 
-                print(f"Total Actions : {len(results)}")
-                print(f"Successful    : {success}")
-                print(f"Ignored       : {ignored}")
-                print(f"Failed        : {failed}")
+                print(
+                    f"Total Actions : {len(results)}"
+                )
+                print(
+                    f"Successful    : {success}"
+                )
+                print(
+                    f"Ignored       : {ignored}"
+                )
+                print(
+                    f"Failed        : {failed}"
+                )
 
                 # ==================================
                 # LOOP DECISION
@@ -290,15 +346,24 @@ class DirectoryCleanupAgent:
                         observations
                     ):
 
-                        print("\n" + "=" * 50)
-                        print("CLEANUP COMPLETED SUCCESSFULLY")
-                        print("=" * 50)
+                        print(
+                            "\n" + "=" * 50
+                        )
+                        print(
+                            "CLEANUP COMPLETED SUCCESSFULLY"
+                        )
+                        print(
+                            "=" * 50
+                        )
 
                         log_iteration(
                             iteration=self.iteration,
                             stage="Agent Loop",
                             status="Completed",
-                            details="Cleanup success condition satisfied."
+                            details=(
+                                "Cleanup success condition "
+                                "satisfied."
+                            )
                         )
 
                         return observations
@@ -309,15 +374,24 @@ class DirectoryCleanupAgent:
 
                     if self.loop_controller.is_max_iterations_reached():
 
-                        print("\n" + "=" * 50)
-                        print("MAXIMUM ITERATIONS REACHED")
-                        print("=" * 50)
+                        print(
+                            "\n" + "=" * 50
+                        )
+                        print(
+                            "MAXIMUM ITERATIONS REACHED"
+                        )
+                        print(
+                            "=" * 50
+                        )
 
                         log_iteration(
                             iteration=self.iteration,
                             stage="Agent Loop",
                             status="Stopped",
-                            details="Maximum iteration limit reached."
+                            details=(
+                                "Maximum iteration limit "
+                                "reached."
+                            )
                         )
 
                         return observations
@@ -326,17 +400,33 @@ class DirectoryCleanupAgent:
                 # CONTINUE TO NEXT ITERATION
                 # ==================================
 
-                print("\n" + "=" * 50)
-                print("CLEANUP NOT COMPLETED")
-                print("=" * 50)
+                print(
+                    "\n" + "=" * 50
+                )
+                print(
+                    "CLEANUP NOT COMPLETED"
+                )
+                print(
+                    "=" * 50
+                )
 
-                print("Failed actions detected.")
+                print(
+                    "Failed actions detected."
+                )
 
                 if self.loop_controller.can_continue():
 
-                    print("\nStarting next iteration...")
+                    print(
+                        "\nStarting next iteration..."
+                    )
+
+            # ==================================
+            # ERROR HANDLING
+            # ==================================
 
             except Exception as error:
+
+                self.error_retries += 1
 
                 log_iteration(
                     iteration=self.iteration,
@@ -345,33 +435,78 @@ class DirectoryCleanupAgent:
                     details=str(error)
                 )
 
-                print(f"\nError : {error}")
+                print(
+                    f"\nError : {error}"
+                )
+
+                print(
+                    f"\nError retry "
+                    f"{self.error_retries}/"
+                    f"{self.max_error_retries}"
+                )
 
                 # ==================================
-                # RETRY AFTER ERROR
+                # CONTROLLED RETRY
                 # ==================================
 
-                if self.loop_controller.can_continue():
+                if (
+                    self.error_retries
+                    <= self.max_error_retries
+                    and self.loop_controller.can_continue()
+                ):
 
-                    print("\nAttempting another iteration...")
+                    print(
+                        "\nAttempting another iteration..."
+                    )
 
-                else:
+                    continue
 
-                    print("\nMaximum iterations reached.")
+                # ==================================
+                # ERROR RETRY LIMIT REACHED
+                # ==================================
+
+                print(
+                    "\n" + "=" * 50
+                )
+                print(
+                    "AGENT STOPPED AFTER REPEATED ERRORS"
+                )
+                print(
+                    "=" * 50
+                )
+
+                log_iteration(
+                    iteration=self.iteration,
+                    stage="Agent Loop",
+                    status="Stopped",
+                    details=(
+                        "Maximum error retry limit reached."
+                    )
+                )
+
+                return []
 
         # ==================================
         # MAXIMUM ITERATIONS REACHED
         # ==================================
 
-        print("\n" + "=" * 50)
-        print("MAXIMUM ITERATIONS REACHED")
-        print("=" * 50)
+        print(
+            "\n" + "=" * 50
+        )
+        print(
+            "MAXIMUM ITERATIONS REACHED"
+        )
+        print(
+            "=" * 50
+        )
 
         log_iteration(
             iteration=self.iteration,
             stage="Agent Loop",
             status="Stopped",
-            details="Maximum iteration limit reached."
+            details=(
+                "Maximum iteration limit reached."
+            )
         )
 
         return []

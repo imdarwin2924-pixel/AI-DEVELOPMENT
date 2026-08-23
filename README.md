@@ -1,22 +1,72 @@
 # 🤖 Directory Clean-Up Agent
 
-An AI-powered agentic system that intelligently analyzes, plans, validates, executes, observes, and remembers directory cleanup operations.
+An AI-powered agentic filesystem automation system that can **perceive, remember, plan, validate, execute, observe, and iterate** over directory cleanup operations.
+
+The project uses **Python + Google Gemini AI** to generate intelligent cleanup plans while maintaining safety through validation, human confirmation, execution verification, persistent memory, and controlled retries.
 
 ---
 
-# 🚀 Progress Report
+# 🎯 Project Overview
+
+The Directory Clean-Up Agent is designed to automate repetitive filesystem organization tasks.
+
+Instead of directly modifying files, the agent follows a controlled agentic workflow:
+
+```text
+Perceive
+    ↓
+Remember
+    ↓
+Plan
+    ↓
+Validate
+    ↓
+Human Confirmation
+    ↓
+Act
+    ↓
+Observe
+    ↓
+Update Memory
+    ↓
+Evaluate
+    ↓
+Repeat if required
+```
+
+The system can:
+
+- Scan directories
+- Collect file metadata
+- Analyze files using Gemini AI
+- Generate cleanup plans
+- Validate AI-generated plans
+- Move files
+- Delete temporary files
+- Rename files
+- Ignore unknown files
+- Verify completed operations
+- Remember previous operations
+- Avoid unnecessary repeated actions
+- Retry temporary failures
+- Stop safely after repeated errors
+- Maintain structured logs
+
+---
+
+# 🚀 Development Progress
 
 ## 📅 Day 1 – Project Setup
 
 ### Objectives
 
-- Initialized the Directory Clean-Up Agent project.
-- Created the project folder structure.
-- Set up a Python virtual environment.
-- Installed required dependencies.
-- Initialized a Git repository.
-- Created the first GitHub repository.
-- Added `.gitignore` to ignore virtual environment, logs, and secrets.
+- Initialized the Directory Clean-Up Agent project
+- Created the project folder structure
+- Set up Python virtual environment
+- Installed required dependencies
+- Initialized Git repository
+- Created GitHub repository
+- Added `.gitignore`
 
 ### Completed
 
@@ -25,18 +75,17 @@ An AI-powered agentic system that intelligently analyzes, plans, validates, exec
 - ✅ GitHub Repository
 - ✅ Basic Project Structure
 - ✅ Dependency Installation
+- ✅ Environment/Secret Protection
 
 ---
 
 # 📅 Day 2 – Project Architecture
 
-### Objectives
+## Objectives
 
-Designed the overall architecture of the agent.
+Designed the modular architecture of the agent.
 
-### Completed
-
-Project Structure
+### Initial Structure
 
 ```text
 DIRECTORY AGENT/
@@ -54,33 +103,36 @@ DIRECTORY AGENT/
 └── .gitignore
 ```
 
-### Modules Created
+### Initial Modules
 
 - Agent
 - Perceive
 - Planner
 - Logger
-- Observer (Skeleton)
-- Executor (Skeleton)
+- Observer
+- Executor
+
+The system was designed using separate modules so that each stage of the agent could be independently tested and improved.
 
 ---
 
 # 📅 Day 3 – Perceive Stage
 
-### Objectives
+## Objectives
 
-Implemented the first phase of the Agent Loop.
+Implemented the first stage of the agent loop.
 
 ### Features
 
 - Directory scanning
 - File metadata collection
+- File name detection
 - Extension detection
 - File size collection
+- File path collection
 - Logging support
-- Sample folder for testing
 
-### Agent Flow
+### Workflow
 
 ```text
 Start
@@ -89,50 +141,50 @@ Start
 Perceive
    │
    ▼
-Collect File Metadata
+Scan Directory
    │
    ▼
-Log Iteration
+Collect Metadata
+   │
+   ▼
+Log Results
 ```
 
-### Output
+### Example Information
 
-The agent successfully scans a directory and gathers information such as:
+```text
+Name      : IMG001.jpg
+Extension : .jpg
+Size      : 0 bytes
+```
 
-- File Name
-- File Extension
-- File Size
-- File Path
-
-No file modifications are performed during this stage.
+No files are modified during the Perceive stage.
 
 ---
 
-# 📅 Day 4 – Planning Stage (Gemini AI)
+# 📅 Day 4 – Gemini AI Planning
 
-### Objectives
+## Objectives
 
-Integrated Google's Gemini API to generate intelligent cleanup plans.
+Integrated Google Gemini AI into the planning stage.
 
 ### Completed
 
-- Gemini API Integration
-- Environment Variable Configuration
-- Secure API Key Management
-- Planner Module
-- Prompt Engineering
-- JSON Response Parsing
-- AI-Based Decision Making
+- Gemini API integration
+- Environment variable configuration
+- Secure API key handling
+- Planner module
+- Prompt engineering
+- JSON response parsing
+- AI-based decision making
 
 ### Workflow
 
 ```text
 Perceive
-     │
-     ▼
+    ↓
 Gemini Planner
-     │
-     ▼
+    ↓
 JSON Cleanup Plan
 ```
 
@@ -140,26 +192,26 @@ JSON Cleanup Plan
 
 ```json
 [
-  {
-    "file": "photo.jpg",
-    "action": "move",
-    "destination": "Images",
-    "reason": "Image file"
-  }
+    {
+        "file": "photo.jpg",
+        "action": "move",
+        "destination": "Images",
+        "reason": "Image file"
+    }
 ]
 ```
 
-The planner only proposes actions and does not modify any files.
+The Planner only proposes actions. It does not directly modify files.
 
 ---
 
 # 📅 Day 5 – Dry Run Execution
 
-### Objectives
+## Objectives
 
 Implemented the execution layer in Dry Run mode.
 
-### Modules Created
+### Tools
 
 ```text
 tools/
@@ -169,10 +221,6 @@ tools/
 └── delete_tool.py
 ```
 
-### Executor
-
-Created a centralized Executor that dispatches actions to the appropriate tool.
-
 ### Supported Actions
 
 - Move
@@ -180,11 +228,7 @@ Created a centralized Executor that dispatches actions to the appropriate tool.
 - Delete
 - Ignore
 
-### Dry Run
-
-No files are actually modified.
-
-Example Output:
+### Dry Run Example
 
 ```text
 ========== ACT STAGE (DRY RUN) ==========
@@ -200,64 +244,40 @@ Delete File : temp.tmp
 notes.pdf
 ```
 
-### Agent Loop
-
-```text
-Perceive
-      │
-      ▼
-Plan (Gemini)
-      │
-      ▼
-Act (Dry Run)
-      │
-      ▼
-Logger
-```
-
-### Current Capabilities
-
-- ✅ Scan folders
-- ✅ Collect metadata
-- ✅ Generate AI cleanup plan
-- ✅ Parse JSON plan
-- ✅ Dispatch actions
-- ✅ Simulate execution
-- ✅ Log every stage
+Dry Run mode allows the execution system to be tested without changing the filesystem.
 
 ---
 
 # 📅 Day 6 – Real File Execution
 
-### Objectives
+## Objectives
 
-Implemented real filesystem operations after successfully testing the Dry Run execution.
+Implemented real filesystem operations.
 
 ### Completed
 
 - Real file movement
 - Real file deletion
+- Real file renaming
 - Destination folder creation
-- File operation result tracking
-- Success and failure handling
-- User confirmation before execution
+- Execution result tracking
+- Success/failure handling
+- User confirmation
 
-### Real Execution Flow
+### Execution Flow
 
 ```text
 Perceive
-      │
-      ▼
+    ↓
 Plan
-      │
-      ▼
+    ↓
+Validate
+    ↓
 Confirmation
-      │
-      ▼
+    ↓
 Act
-      │
-      ▼
-Real File Operation
+    ↓
+Filesystem Operation
 ```
 
 ### Example
@@ -270,27 +290,13 @@ Real File Operation
 ✔ Deleted old_file.tmp
 ```
 
-### Structured Execution Result
-
-The Executor returns structured results such as:
-
-```python
-{
-    "status": "success",
-    "action": "move",
-    "file": "IMG001.jpg",
-    "destination": "Images",
-    "dry_run": False
-}
-```
-
 ---
 
 # 📅 Day 7 – Observe Stage
 
-### Objectives
+## Objectives
 
-Implemented the Observe stage to verify whether file operations were actually successful.
+Implemented the Observe stage to verify whether requested operations actually succeeded.
 
 ### Completed
 
@@ -301,37 +307,33 @@ Implemented the Observe stage to verify whether file operations were actually su
 - Observation report generation
 - Verification status tracking
 
-### Agent Loop
+### Workflow
 
 ```text
 Perceive
-      │
-      ▼
+    ↓
 Plan
-      │
-      ▼
+    ↓
 Act
-      │
-      ▼
+    ↓
 Observe
-      │
-      ▼
+    ↓
 Verify Results
 ```
 
-### Example Output
+### Example
 
 ```text
 ========== OBSERVE STAGE ==========
 
 ✔ Verified: test_image.jpg moved successfully.
+
 ✔ Verified: test_temp.tmp deleted successfully.
+
 ℹ Ignored: unknown.xyz
 ```
 
 ### Observation Report
-
-The observation results are stored in:
 
 ```text
 logs/observation_report.json
@@ -341,15 +343,14 @@ logs/observation_report.json
 
 # 📅 Day 8 – Agent Loop & Iteration Control
 
-### Objectives
+## Objectives
 
-Implemented an Agent Loop that allows the agent to repeatedly perceive, plan, act, and observe until cleanup is completed or the maximum iteration limit is reached.
+Implemented a continuous agent loop.
 
 ### New Module
 
 ```text
-src/
-└── loop_controller.py
+src/loop_controller.py
 ```
 
 ### Completed
@@ -358,9 +359,9 @@ src/
 - Maximum iteration limit
 - Cleanup completion detection
 - Failed action detection
-- Continue/stop decision
+- Continue/stop decisions
 - Agent loop integration
-- Loop controller testing
+- Loop controller tests
 
 ### Agent Loop
 
@@ -381,31 +382,28 @@ src/
         │   OBSERVE    │
         └──────┬───────┘
                ↓
-        Cleanup Complete?
-          │           │
-         Yes          No
-          │           │
-          ▼           └──────→ Next Iteration
+       Cleanup Complete?
+          │          │
+         Yes         No
+          │          │
+          ▼          └────→ Next Iteration
        Complete
 ```
 
-### Safety
-
-A maximum iteration limit prevents the agent from running indefinitely.
+A maximum iteration limit prevents infinite execution.
 
 ---
 
 # 📅 Day 9 – Plan Validation & Safety
 
-### Objectives
+## Objectives
 
-Implemented a validation layer to verify AI-generated cleanup plans before execution.
+Implemented a validation layer between AI planning and filesystem execution.
 
 ### New Module
 
 ```text
-src/
-└── plan_validator.py
+src/plan_validator.py
 ```
 
 ### Validation Checks
@@ -419,20 +417,19 @@ The validator checks:
 - Conflicting actions
 - Unsafe destinations
 
-### Validation Workflow
+### Workflow
 
 ```text
 Gemini Plan
-     │
-     ▼
+    ↓
 Plan Validator
-     │
- ┌───┴────┐
- │        │
-Valid    Invalid
- │        │
- ▼        ▼
-Execute  Stop
+    ↓
+ ┌──┴──┐
+ │     │
+Valid Invalid
+ │     │
+ ↓     ↓
+Act   Stop
 ```
 
 ### Example
@@ -443,30 +440,28 @@ Execute  Stop
 ✅ Plan validation passed.
 ```
 
-### Invalid Plan Example
+### Invalid Action
 
-```python
+```text
 {
-    "valid": False,
+    "valid": false,
     "errors": [
         "Invalid action 'compress' for 'IMG001.jpg'."
     ]
 }
 ```
 
-### Unsafe Destination Protection
+### Unsafe Destination
 
-The validator prevents unsafe destinations such as:
+Destinations such as:
 
 ```text
 ../outside_folder
 ```
 
-from being used.
+are rejected.
 
-### Testing
-
-The following validation scenarios were tested:
+### Validation Tests
 
 ```text
 TEST 1 — VALID PLAN
@@ -480,22 +475,21 @@ All validation scenarios were successfully verified.
 
 ---
 
-# 📅 Day 10 – Agent Memory
+# 📅 Day 10 – Persistent Agent Memory
 
-### Objectives
+## Objectives
 
 Implemented persistent memory so the agent can remember previous cleanup operations.
 
 ### New Module
 
 ```text
-src/
-└── memory.py
+src/memory.py
 ```
 
-### Memory Stores
+### Memory Information
 
-The agent memory stores:
+The system stores:
 
 - Timestamp
 - Iteration
@@ -505,7 +499,7 @@ The agent memory stores:
 - Destination
 - Message
 
-### Example Memory Entry
+### Example
 
 ```json
 {
@@ -530,64 +524,53 @@ The memory system supports:
 - Clear memory
 - Persistent JSON storage
 
-### Memory Persistence
-
-Memory is stored in:
+### Storage
 
 ```text
 logs/memory.json
 ```
 
-The persistence tests verified that memory remains available across separate executions.
+Memory persistence was verified across separate executions.
 
 ---
 
 # 📅 Day 11 – Memory-Aware Planning
 
-### Objectives
+## Objectives
 
-Connected persistent memory to the planning system so previous cleanup history can influence future decisions.
+Connected persistent memory to the Gemini Planner.
+
+The Planner can now consider previous cleanup operations before generating a new plan.
 
 ### Memory-Aware Architecture
 
 ```text
-              ┌──────────────┐
-              │   PERCEIVE   │
-              └──────┬───────┘
-                     ↓
-              ┌──────────────┐
-              │    MEMORY    │
-              └──────┬───────┘
-                     ↓
-              ┌──────────────┐
-              │ GEMINI PLAN  │
-              └──────┬───────┘
-                     ↓
-              ┌──────────────┐
-              │   VALIDATE   │
-              └──────┬───────┘
-                     ↓
-              ┌──────────────┐
-              │     ACT      │
-              └──────┬───────┘
-                     ↓
-              ┌──────────────┐
-              │   OBSERVE    │
-              └──────┬───────┘
-                     ↓
-                  MEMORY
+        ┌──────────────┐
+        │   PERCEIVE   │
+        └──────┬───────┘
+               ↓
+        ┌──────────────┐
+        │    MEMORY    │
+        └──────┬───────┘
+               ↓
+        ┌──────────────┐
+        │ GEMINI PLAN  │
+        └──────┬───────┘
+               ↓
+        ┌──────────────┐
+        │   VALIDATE   │
+        └──────┬───────┘
+               ↓
+        ┌──────────────┐
+        │     ACT      │
+        └──────┬───────┘
+               ↓
+        ┌──────────────┐
+        │   OBSERVE    │
+        └──────┬───────┘
+               ↓
+             MEMORY
 ```
-
-### Completed
-
-- Latest file history lookup
-- Memory context generation
-- Memory-aware planning
-- Previous action analysis
-- Repeated action prevention
-- Persistent memory integration with Planner
-- Persistent memory integration with Observer
-- Full memory-aware agent testing
 
 ### Example
 
@@ -600,7 +583,7 @@ report.pdf
 → verified
 ```
 
-the planner can make the decision:
+The Planner can decide:
 
 ```text
 report.pdf
@@ -608,7 +591,7 @@ report.pdf
 → Already processed successfully
 ```
 
-At the same time, new files continue to receive normal decisions:
+New files continue to receive normal decisions:
 
 ```text
 new_image.jpg
@@ -618,38 +601,26 @@ temporary.tmp
 → delete
 ```
 
-### Day 11 Testing
+### Completed
 
-The following tests were successfully completed:
-
-- ✅ Latest Memory
-- ✅ Memory Planner
-- ✅ Memory-Aware Planner
-- ✅ Full Memory Agent Run 1
-- ✅ Full Memory Agent Run 2
-- ✅ Memory Persistence
+- Latest file history lookup
+- Memory context generation
+- Memory-aware planning
+- Previous action analysis
+- Repeated action prevention
+- Planner-memory integration
+- Observer-memory integration
+- Persistent memory testing
 
 ---
 
-# 📅 Day 12 – Final Integration & Reliability
+# 📅 Day 12 – Integration & Reliability
 
-### Objectives
+## Objectives
 
-Integrated all agent components and performed final reliability, testing, and end-to-end verification.
+Integrated the major agent components and verified the complete workflow.
 
-### Reliability Improvements
-
-Improved the memory system to safely handle:
-
-- Missing memory files
-- Invalid JSON
-- Invalid memory structures
-- File read errors
-- File write errors
-
-Memory failures now generate warnings instead of unnecessarily stopping the entire agent.
-
-### Final Agent Pipeline
+### Final Pipeline
 
 ```text
 ┌──────────────┐
@@ -685,67 +656,173 @@ Memory failures now generate warnings instead of unnecessarily stopping the enti
 └──────────────┘
 ```
 
-### Final Testing
+### Completed
 
-The final real-agent test successfully demonstrated:
-
-```text
-Total Actions : 7
-Successful    : 4
-Ignored       : 3
-Failed        : 0
-```
-
-### Successful Operations
-
-Examples of successful operations included:
-
-```text
-final_test.jpg
-→ Images
-→ verified
-
-test_image.jpg
-→ Images
-→ verified
-
-final_test.tmp
-→ deleted
-→ verified
-
-test_temp.tmp
-→ deleted
-→ verified
-```
-
-Unknown file types were safely ignored.
-
-### Final Verification
-
-The agent successfully demonstrated:
-
-- ✅ Real filesystem operations
-- ✅ Plan validation
-- ✅ User confirmation
-- ✅ Execution
-- ✅ Observation
-- ✅ Persistent memory
-- ✅ Memory-aware planning
-- ✅ Iteration control
-- ✅ Error handling
-- ✅ End-to-end execution
-- ✅ Zero failed actions in the final test
+- Full agent integration
+- Real filesystem execution
+- Plan validation
+- User confirmation
+- Observation
+- Persistent memory
+- Memory-aware planning
+- Iteration control
+- End-to-end testing
 
 ---
 
-# 🏗 Current Project Structure
+# 📅 Day 13 – Reliability, Error Handling & Regression Testing
+
+## Objectives
+
+Strengthened the agent against planner failures, corrupted memory, repeated errors, and invalid plans.
+
+---
+
+## 13.1 Controlled Error Retry
+
+The Agent now has controlled error retries.
+
+### Configuration
+
+```python
+self.error_retries = 0
+self.max_error_retries = 2
+```
+
+### Behavior
+
+```text
+Planner/API Error
+       ↓
+Error 1 → Retry
+       ↓
+Error 2 → Retry
+       ↓
+Error 3 → Stop Safely
+```
+
+The agent no longer repeatedly attempts the same failed operation indefinitely.
+
+### Example
+
+```text
+Error : Simulated Planner failure
+
+Error retry 1/2
+
+Attempting another iteration...
+```
+
+After repeated failure:
+
+```text
+==================================================
+AGENT STOPPED AFTER REPEATED ERRORS
+==================================================
+
+RESULT:
+[]
+```
+
+### Verification
+
+The controlled retry test successfully passed.
+
+---
+
+# 13.2 Planner Error Handling
+
+The Planner was tested against multiple failure conditions.
+
+### Tested Scenarios
+
+```text
+TEST 1 — GEMINI API FAILURE
+TEST 2 — EMPTY RESPONSE
+TEST 3 — INVALID JSON
+TEST 4 — MISSING FILE
+TEST 5 — VALID RESPONSE
+```
+
+All scenarios passed.
+
+### Example
+
+```text
+TEST 1 — GEMINI API FAILURE
+✅ TEST PASSED
+```
+
+The Planner safely converts API and response problems into controlled errors.
+
+---
+
+# 13.3 Memory Error Handling
+
+Persistent memory was tested against:
+
+- Missing memory file
+- Valid memory
+- Corrupted JSON
+- Invalid memory structure
+- Recovery after corruption
+
+### Results
+
+```text
+TEST 1 — MISSING MEMORY FILE
+✅ TEST PASSED
+
+TEST 2 — VALID MEMORY
+✅ TEST PASSED
+
+TEST 3 — CORRUPTED JSON
+✅ TEST PASSED
+
+TEST 4 — WRONG MEMORY FORMAT
+✅ TEST PASSED
+
+TEST 5 — MEMORY RECOVERY
+✅ TEST PASSED
+```
+
+If `memory.json` contains invalid JSON, the system safely starts with empty memory instead of crashing.
+
+---
+
+# 13.4 Full Regression Testing
+
+The following components were regression tested:
+
+```text
+Loop Controller
+Plan Validator
+Memory
+Observer
+Memory Persistence
+Latest Memory
+Memory Planner
+Memory-Aware Planner
+Planner Error Handling
+Agent Error Handling
+Memory Error Handling
+```
+
+### Final Validation Result
+
+```text
+All critical regression tests passed.
+```
+
+---
+
+# 🏗️ Current Project Structure
 
 ```text
 DIRECTORY AGENT/
 │
 ├── data/
-│   ├── sample_folder/
-│   └── memory_test_folder/
+│   └── sample_folder/
 │
 ├── docs/
 │
@@ -773,16 +850,36 @@ DIRECTORY AGENT/
 │   └── delete_tool.py
 │
 ├── tests/
-│   ├── test_loop_controller.py
-│   ├── test_plan_validator.py
-│   ├── test_memory.py
-│   ├── test_observer_memory.py
-│   ├── test_memory_persistence.py
+│   ├── __init__.py
+│   ├── test_agent_error_handling.py
+│   ├── test_agent_validation.py
+│   ├── test_delete.py
+│   ├── test_delete_real.py
+│   ├── test_executor.py
+│   ├── test_executor_real.py
+│   ├── test_gemini.py
 │   ├── test_latest_memory.py
-│   ├── test_memory_planner.py
-│   ├── test_memory_aware_planner.py
+│   ├── test_logger.py
+│   ├── test_loop_controller.py
+│   ├── test_memory.py
 │   ├── test_memory_agent.py
-│   └── test_memory_agent_run2.py
+│   ├── test_memory_agent_run2.py
+│   ├── test_memory_aware_planner.py
+│   ├── test_memory_error_handling.py
+│   ├── test_memory_persistence.py
+│   ├── test_memory_planner.py
+│   ├── test_move.py
+│   ├── test_move_real.py
+│   ├── test_observer.py
+│   ├── test_observer_memory.py
+│   ├── test_perceive.py
+│   ├── test_plan_validator.py
+│   ├── test_planner.py
+│   ├── test_planner_error_handling.py
+│   ├── test_real_memory.py
+│   ├── test_rename.py
+│   ├── test_rename_real.py
+│   └── test_scan.py
 │
 ├── main.py
 ├── README.md
@@ -794,130 +891,199 @@ DIRECTORY AGENT/
 
 # 🔄 Complete Agent Workflow
 
-The complete system now follows:
-
 ```text
-                    START
-                      │
-                      ▼
-              ┌──────────────┐
-              │   PERCEIVE   │
-              └──────┬───────┘
-                     │
-                     ▼
-              ┌──────────────┐
-              │    MEMORY    │
-              └──────┬───────┘
-                     │
-                     ▼
-              ┌──────────────┐
-              │     PLAN     │
-              │   Gemini AI  │
-              └──────┬───────┘
-                     │
-                     ▼
-              ┌──────────────┐
-              │   VALIDATE   │
-              └──────┬───────┘
-                     │
-              ┌──────┴──────┐
-              │             │
-           INVALID         VALID
-              │             │
-              ▼             ▼
-             STOP      CONFIRMATION
-                            │
-                       ┌────┴────┐
-                       │         │
-                      NO        YES
-                       │         │
-                       ▼         ▼
-                     STOP       ACT
-                                 │
-                                 ▼
-                           ┌──────────────┐
-                           │   OBSERVE    │
-                           └──────┬───────┘
-                                  │
-                                  ▼
-                           ┌──────────────┐
-                           │    MEMORY    │
-                           └──────┬───────┘
-                                  │
-                                  ▼
-                         Cleanup Complete?
-                            │          │
-                           YES         NO
-                            │          │
-                            ▼          ▼
-                         COMPLETE   NEXT ITERATION
+                         START
+                           │
+                           ▼
+                  ┌────────────────┐
+                  │    PERCEIVE     │
+                  └───────┬────────┘
+                          │
+                          ▼
+                  ┌────────────────┐
+                  │     MEMORY      │
+                  └───────┬────────┘
+                          │
+                          ▼
+                  ┌────────────────┐
+                  │      PLAN       │
+                  │   Gemini AI     │
+                  └───────┬────────┘
+                          │
+                          ▼
+                  ┌────────────────┐
+                  │    VALIDATE     │
+                  └───────┬────────┘
+                          │
+                    ┌─────┴─────┐
+                    │           │
+                 INVALID       VALID
+                    │           │
+                    ▼           ▼
+                   STOP    CONFIRMATION
+                                │
+                          ┌─────┴─────┐
+                          │           │
+                         NO          YES
+                          │           │
+                          ▼           ▼
+                         STOP         ACT
+                                      │
+                                      ▼
+                                ┌────────────┐
+                                │  OBSERVE   │
+                                └─────┬──────┘
+                                      │
+                                      ▼
+                                ┌────────────┐
+                                │   MEMORY   │
+                                └─────┬──────┘
+                                      │
+                                      ▼
+                              Cleanup Complete?
+                                 │          │
+                                YES         NO
+                                 │          │
+                                 ▼          ▼
+                              COMPLETE  NEXT ITERATION
 ```
 
 ---
 
 # 🧠 Agentic Capabilities
 
-The Directory Clean-Up Agent now demonstrates the major components of an agentic workflow:
+The project demonstrates the major components of an agentic system.
 
-### 1. Perception
+## 1. Perception
 
-The agent observes the current state of the filesystem.
+The agent observes the current filesystem state.
 
-### 2. Reasoning
+```text
+Directory
+   ↓
+Files
+   ↓
+Metadata
+```
 
-Gemini AI analyzes the files and determines suitable cleanup actions.
+---
 
-### 3. Planning
+## 2. Memory
 
-The AI creates a structured cleanup plan before any modification occurs.
+The agent remembers previous cleanup operations.
 
-### 4. Validation
+```text
+File
+ ↓
+Action
+ ↓
+Status
+ ↓
+Destination
+ ↓
+Timestamp
+```
 
-The generated plan is checked for safety and correctness.
+---
 
-### 5. Action
+## 3. Reasoning
 
-The Executor performs the approved filesystem operations.
+Gemini AI analyzes the current files and previous memory context.
 
-### 6. Observation
+---
 
-The agent verifies whether the requested operations succeeded.
+## 4. Planning
 
-### 7. Memory
+The Planner produces structured JSON actions.
 
-The agent stores successful operations for future decision making.
+---
 
-### 8. Iteration
+## 5. Validation
 
-The agent can repeat the process when cleanup is not complete.
+The AI-generated plan is checked before execution.
 
-### 9. Safety
+---
 
-The agent includes confirmation, validation, destination safety checks, and maximum iteration limits.
+## 6. Human Approval
+
+The user must approve the plan before real filesystem modifications.
+
+---
+
+## 7. Action
+
+The Executor performs the requested filesystem operation.
+
+---
+
+## 8. Observation
+
+The Observer verifies whether the operation succeeded.
+
+---
+
+## 9. Learning Through Memory
+
+Successful operations are stored and used during future planning.
+
+---
+
+## 10. Iteration
+
+The agent can repeat the workflow when cleanup is incomplete.
+
+---
+
+## 11. Error Recovery
+
+The agent can retry temporary failures and stop safely after repeated failures.
 
 ---
 
 # 🛡️ Safety Features
 
-The project includes multiple safety mechanisms:
+The project contains multiple safety mechanisms.
+
+### User Safety
 
 - ✅ User confirmation before execution
-- ✅ Plan validation
+- ✅ No automatic execution without approval
+
+### Plan Safety
+
 - ✅ File existence validation
 - ✅ Valid action validation
 - ✅ Destination validation
+- ✅ Missing destination detection
+- ✅ Duplicate action detection
+- ✅ Conflicting action detection
 - ✅ Unsafe path detection
-- ✅ Duplicate/conflicting action detection
-- ✅ Execution verification
-- ✅ Persistent operation history
+
+### Execution Safety
+
+- ✅ Real execution only after confirmation
+- ✅ Structured execution results
+- ✅ Post-execution verification
+
+### Agent Safety
+
 - ✅ Maximum iteration limit
-- ✅ Memory error handling
+- ✅ Controlled error retry
+- ✅ Safe stop after repeated errors
+
+### Memory Safety
+
+- ✅ Missing memory file handling
+- ✅ Invalid JSON handling
+- ✅ Invalid memory structure handling
+- ✅ Memory read error handling
+- ✅ Memory write error handling
 
 ---
 
 # 🧪 Testing
 
-Individual tests can be executed using:
+Tests can be executed individually using:
 
 ```powershell
 python -m tests.test_loop_controller
@@ -930,26 +1096,35 @@ python -m tests.test_memory_planner
 python -m tests.test_memory_aware_planner
 python -m tests.test_memory_agent
 python -m tests.test_memory_agent_run2
+python -m tests.test_planner_error_handling
+python -m tests.test_agent_error_handling
+python -m tests.test_memory_error_handling
 ```
 
-### Test Categories
+---
+
+# 🧪 Testing Categories
 
 ```text
-Loop Control
-     ↓
-Plan Validation
-     ↓
-Memory
-     ↓
-Observer
-     ↓
-Memory Persistence
-     ↓
-Memory-Aware Planning
-     ↓
-Full Agent
-     ↓
-End-to-End Testing
+                 TESTING
+                    │
+       ┌────────────┼────────────┐
+       │            │            │
+       ▼            ▼            ▼
+   Core Tests   Safety Tests  Memory Tests
+       │            │            │
+       ▼            ▼            ▼
+   Executor      Validator    Persistence
+   Perceive      Agent        History
+   Planner       Retry        Memory Planner
+   Observer
+       │            │            │
+       └────────────┼────────────┘
+                    ▼
+             Integration Tests
+                    │
+                    ▼
+             End-to-End Tests
 ```
 
 ---
@@ -958,8 +1133,9 @@ End-to-End Testing
 
 - Python 3.10+
 - Google Gemini API
-- Python Virtual Environment
-- Required Python dependencies from `requirements.txt`
+- Python virtual environment
+- Internet connection for Gemini API calls
+- Dependencies listed in `requirements.txt`
 
 Install dependencies:
 
@@ -971,23 +1147,31 @@ pip install -r requirements.txt
 
 # 🔐 Configuration
 
-The Gemini API key should be configured securely through the project's configuration system.
+The Gemini API key should be stored securely.
 
-Never commit API keys, passwords, tokens, or other secrets to GitHub.
-
-Example:
+Example `.env` configuration:
 
 ```text
 GEMINI_API_KEY=your_api_key_here
 ```
 
-The actual API key must never be placed directly inside source code or committed to the repository.
+Never place the actual API key directly inside source code.
+
+Never commit:
+
+- API keys
+- Passwords
+- Tokens
+- Credentials
+- `.env` files
+
+The `.gitignore` protects environment files and runtime logs.
 
 ---
 
-# ▶️ Running the Agent
+# ▶️ Running the Project
 
-### 1. Activate the virtual environment
+## 1. Activate the Virtual Environment
 
 Windows PowerShell:
 
@@ -995,35 +1179,43 @@ Windows PowerShell:
 .\.venv\Scripts\Activate.ps1
 ```
 
-### 2. Run the agent
+---
+
+## 2. Run the Agent
 
 ```powershell
 python main.py
 ```
 
-### 3. Review the generated results
+---
 
-Observation report:
+## 3. Confirm the Cleanup Plan
 
-```text
-logs/observation_report.json
-```
-
-Iteration logs:
+The agent displays the generated plan:
 
 ```text
-logs/iterations.json
+Apply these changes? (yes/no):
 ```
 
-Persistent memory:
+Enter:
 
 ```text
-logs/memory.json
+yes
 ```
+
+to execute the approved operations.
+
+Enter:
+
+```text
+no
+```
+
+to cancel.
 
 ---
 
-# 📊 Example Agent Execution
+# 📊 Example Execution
 
 ```text
 ============================================================
@@ -1073,6 +1265,7 @@ Executing cleanup...
 ========== OBSERVE STAGE ==========
 
 ✔ Verified: test_image.jpg moved successfully.
+
 ✔ Verified: test_temp.tmp deleted successfully.
 
 ==================================================
@@ -1087,21 +1280,52 @@ Failed        : 0
 
 ---
 
+# 📁 Runtime Logs
+
+The agent generates structured runtime information.
+
+## Iteration Log
+
+```text
+logs/iterations.json
+```
+
+Stores information about agent iterations and stages.
+
+## Memory
+
+```text
+logs/memory.json
+```
+
+Stores persistent cleanup history.
+
+## Observation Report
+
+```text
+logs/observation_report.json
+```
+
+Stores post-execution verification results.
+
+---
+
 # 📈 Development Progress
 
 ```text
-Day 1  → Project Setup              ✅
-Day 2  → Architecture               ✅
-Day 3  → Perceive Stage             ✅
-Day 4  → Gemini AI Planning         ✅
-Day 5  → Dry Run Execution          ✅
-Day 6  → Real File Execution        ✅
-Day 7  → Observe Stage              ✅
-Day 8  → Agent Loop                 ✅
-Day 9  → Plan Validation            ✅
-Day 10 → Agent Memory               ✅
-Day 11 → Memory-Aware Planning      ✅
-Day 12 → Final Integration          ✅
+Day 1  → Project Setup                    ✅
+Day 2  → Architecture                     ✅
+Day 3  → Perceive Stage                   ✅
+Day 4  → Gemini AI Planning               ✅
+Day 5  → Dry Run Execution                ✅
+Day 6  → Real File Execution              ✅
+Day 7  → Observe Stage                    ✅
+Day 8  → Agent Loop                      ✅
+Day 9  → Plan Validation & Safety         ✅
+Day 10 → Persistent Agent Memory         ✅
+Day 11 → Memory-Aware Planning            ✅
+Day 12 → Integration & Reliability        ✅
+Day 13 → Error Handling & Regression      ✅
 ```
 
 ---
@@ -1111,19 +1335,22 @@ Day 12 → Final Integration          ✅
 ## Core System
 
 - ✅ Project Setup
-- ✅ Virtual Environment
+- ✅ Python Virtual Environment
 - ✅ Git Repository
 - ✅ GitHub Repository
-- ✅ Agent Architecture
+- ✅ Modular Architecture
 - ✅ Perceive Stage
 - ✅ Gemini AI Integration
 - ✅ AI Planning
 - ✅ JSON Parsing
 - ✅ Dry Run Execution
 - ✅ Real File Execution
-- ✅ Modular Tool System
+- ✅ Move Tool
+- ✅ Rename Tool
+- ✅ Delete Tool
+- ✅ Ignore Action
 - ✅ Executor
-- ✅ Logging System
+- ✅ Logger
 
 ## Agentic Features
 
@@ -1139,119 +1366,144 @@ Day 12 → Final Integration          ✅
 - ✅ Memory-Aware Planning
 - ✅ Repeated Action Prevention
 - ✅ Error Handling
+- ✅ Controlled Retry
+- ✅ Memory Recovery
 - ✅ End-to-End Agent Loop
 
 ## Testing
 
 - ✅ Loop Controller Testing
 - ✅ Plan Validator Testing
+- ✅ Executor Testing
+- ✅ Perceive Testing
 - ✅ Observer Testing
 - ✅ Memory Testing
 - ✅ Memory Persistence Testing
 - ✅ Latest Memory Testing
 - ✅ Memory Planner Testing
 - ✅ Memory-Aware Planner Testing
-- ✅ Full Agent Testing
-- ✅ Final End-to-End Testing
+- ✅ Planner Error Handling
+- ✅ Agent Error Handling
+- ✅ Memory Error Handling
+- ✅ Regression Testing
 
 ---
 
 # 🚧 Future Improvements
 
-Possible future improvements include:
+Possible future enhancements include:
 
 - GUI interface
+- Web dashboard
 - Scheduled cleanup
 - Undo/recovery functionality
-- File duplicate detection
+- Automatic backup before deletion
+- Duplicate file detection
 - More file categories
 - Configurable cleanup rules
-- Detailed dashboard
-- Cloud storage integration
-- Automatic backup before deletion
-- Advanced agent reasoning
-- More sophisticated memory retrieval
-- Human approval levels
-- Cleanup history dashboard
 - Custom user-defined cleanup policies
+- Advanced memory retrieval
+- File similarity detection
+- Cleanup history dashboard
+- Cloud storage integration
+- Multi-directory support
+- Advanced Gemini reasoning
+- Human approval levels
+- Configurable retry policies
+- Automatic recovery strategies
 
 ---
 
-# 🎯 Project Status
-
-## Development Status
+# 🏆 Project Status
 
 ```text
-                 DIRECTORY
-                CLEAN-UP AGENT
-                      │
-                      ▼
-              ┌──────────────┐
-              │   PERCEIVE   │
-              └──────┬───────┘
-                     ▼
-              ┌──────────────┐
-              │    MEMORY    │
-              └──────┬───────┘
-                     ▼
-              ┌──────────────┐
-              │     PLAN     │
-              │   Gemini AI  │
-              └──────┬───────┘
-                     ▼
-              ┌──────────────┐
-              │   VALIDATE   │
-              └──────┬───────┘
-                     ▼
-              ┌──────────────┐
-              │ CONFIRMATION │
-              └──────┬───────┘
-                     ▼
-              ┌──────────────┐
-              │     ACT      │
-              └──────┬───────┘
-                     ▼
-              ┌──────────────┐
-              │   OBSERVE    │
-              └──────┬───────┘
-                     ▼
-              ┌──────────────┐
-              │    MEMORY    │
-              └──────┬───────┘
-                     │
-                     ▼
-                NEXT DECISION
+┌─────────────────────────────────────────┐
+│       DIRECTORY CLEAN-UP AGENT          │
+│                                         │
+│  Perceive                               │
+│      ↓                                  │
+│  Remember                               │
+│      ↓                                  │
+│  Gemini AI Planning                    │
+│      ↓                                  │
+│  Plan Validation                        │
+│      ↓                                  │
+│  Human Confirmation                     │
+│      ↓                                  │
+│  Execute                                │
+│      ↓                                  │
+│  Observe                                │
+│      ↓                                  │
+│  Update Memory                          │
+│      ↓                                  │
+│  Evaluate                               │
+│      ↓                                  │
+│  Retry / Iterate / Complete             │
+│                                         │
+└─────────────────────────────────────────┘
 ```
 
-# 🏆 Final Status
+## Current Status
 
-**Directory Clean-Up Agent — Core Development Complete**
+**Core Development Complete**
 
-The project successfully demonstrates an end-to-end agentic filesystem automation workflow:
+The project successfully demonstrates an end-to-end agentic filesystem automation workflow.
+
+The system can:
+
+1. Perceive a directory
+2. Collect file metadata
+3. Retrieve previous memory
+4. Generate an AI-based cleanup plan
+5. Validate the plan
+6. Ask for human confirmation
+7. Execute filesystem operations
+8. Observe and verify results
+9. Store operation history
+10. Use memory during future planning
+11. Retry controlled failures
+12. Recover from memory errors
+13. Stop safely when repeated errors occur
+
+---
+
+# 🎯 Core Concept
 
 ```text
-Perception
-    ↓
-Memory
-    ↓
-AI Reasoning
-    ↓
-Planning
-    ↓
-Validation
-    ↓
-Human Confirmation
-    ↓
-Action
-    ↓
-Observation
-    ↓
-Memory
-    ↓
-Iteration
+┌───────────┐
+│ PERCEIVE  │
+└─────┬─────┘
+      ↓
+┌───────────┐
+│  REMEMBER │
+└─────┬─────┘
+      ↓
+┌───────────┐
+│   PLAN    │
+└─────┬─────┘
+      ↓
+┌───────────┐
+│ VALIDATE  │
+└─────┬─────┘
+      ↓
+┌───────────┐
+│   ACT     │
+└─────┬─────┘
+      ↓
+┌───────────┐
+│  OBSERVE  │
+└─────┬─────┘
+      ↓
+┌───────────┐
+│  MEMORY   │
+└─────┬─────┘
+      ↓
+┌───────────┐
+│  ITERATE  │
+└───────────┘
 ```
 
-The system is capable of analyzing a directory, generating an AI-based cleanup plan, validating that plan for safety, executing approved filesystem operations, verifying the results, and remembering previous operations for future decisions.
+> **Perceive → Remember → Plan → Validate → Act → Observe → Learn → Repeat**
 
 ---
 
@@ -1259,10 +1511,32 @@ The system is capable of analyzing a directory, generating an AI-based cleanup p
 
 ## Directory Clean-Up Agent
 
-**AI-powered agentic filesystem automation using Python and Gemini AI.**
+**AI-powered agentic filesystem automation using Python and Google Gemini AI.**
+
+The project combines AI planning with deterministic filesystem tools, safety validation, human approval, observation, persistent memory, and controlled iteration.
 
 ---
 
-## ⭐ Core Concept
+# ⭐ Final Development Status
 
-> **Perceive → Remember → Plan → Validate → Act → Observe → Learn → Repeat**
+```text
+PROJECT SETUP             ✅
+AGENT ARCHITECTURE        ✅
+PERCEPTION                ✅
+GEMINI PLANNING           ✅
+DRY RUN                   ✅
+REAL EXECUTION            ✅
+OBSERVATION               ✅
+ITERATION CONTROL         ✅
+PLAN VALIDATION           ✅
+PERSISTENT MEMORY         ✅
+MEMORY-AWARE PLANNING     ✅
+ERROR HANDLING            ✅
+CONTROLLED RETRY          ✅
+MEMORY RECOVERY           ✅
+REGRESSION TESTING        ✅
+
+             CORE DEVELOPMENT COMPLETE
+```
+
+---

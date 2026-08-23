@@ -34,9 +34,20 @@ class Planner:
             if not file_name:
                 continue
 
-            history = self.memory.get_latest_file_history(
-                file_name
-            )
+            try:
+
+                history = self.memory.get_latest_file_history(
+                    file_name
+                )
+
+            except Exception as error:
+
+                print(
+                    f"⚠ Memory lookup failed for "
+                    f"{file_name}: {error}"
+                )
+
+                continue
 
             if history:
 
@@ -66,6 +77,93 @@ class Planner:
         )
 
     # ==================================
+    # CLEAN AI RESPONSE
+    # ==================================
+
+    def _clean_response(self, text):
+
+        if not text:
+
+            raise ValueError(
+                "Gemini returned an empty response."
+            )
+
+        text = text.strip()
+
+        # Remove Markdown code fences
+        if text.startswith("```json"):
+
+            text = text[len("```json"):]
+
+            if text.endswith("```"):
+                text = text[:-3]
+
+        elif text.startswith("```"):
+
+            text = text[3:]
+
+            if text.endswith("```"):
+                text = text[:-3]
+
+        return text.strip()
+
+    # ==================================
+    # VALIDATE GENERATED PLAN
+    # ==================================
+
+    def _validate_plan(self, plan, files):
+
+        if not isinstance(plan, list):
+
+            raise ValueError(
+                "Planner response must be a JSON array."
+            )
+
+        expected_files = {
+            file.get("name")
+            for file in files
+            if file.get("name")
+        }
+
+        planned_files = {
+            item.get("file")
+            for item in plan
+            if isinstance(item, dict)
+        }
+
+        missing_files = expected_files - planned_files
+
+        if missing_files:
+
+            raise ValueError(
+                f"Planner omitted files: "
+                f"{sorted(missing_files)}"
+            )
+
+        for item in plan:
+
+            if not isinstance(item, dict):
+
+                raise ValueError(
+                    "Every plan item must be a JSON object."
+                )
+
+            if not item.get("file"):
+
+                raise ValueError(
+                    "Plan item is missing 'file'."
+                )
+
+            if not item.get("action"):
+
+                raise ValueError(
+                    f"Missing action for "
+                    f"'{item.get('file')}'."
+                )
+
+        return plan
+
+    # ==================================
     # GENERATE PLAN
     # ==================================
 
@@ -88,7 +186,7 @@ IMPORTANT OUTPUT RULES:
 4. Return ONLY a valid JSON array.
 5. Do not include Markdown or explanations outside the JSON array.
 6. Even if a file was processed previously, it MUST still appear in the plan.
-7. If a file was previously processed successfully, choose "ignore"
+7. If a file was processed successfully, choose "ignore"
    instead of repeating the same action unnecessarily.
 8. If previous processing failed, evaluate the file again.
 
@@ -135,32 +233,70 @@ Current files:
 {json.dumps(files, indent=4)}
 """
 
-        response = self.client.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=prompt
+        # ==================================
+        # GEMINI API CALL
+        # ==================================
+
+        try:
+
+            response = self.client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=prompt
+            )
+
+        except Exception as error:
+
+            raise RuntimeError(
+                f"Gemini API request failed: {error}"
+            ) from error
+
+        # ==================================
+        # RESPONSE EXTRACTION
+        # ==================================
+
+        try:
+
+            text = response.text
+
+        except Exception as error:
+
+            raise ValueError(
+                f"Unable to read Gemini response: {error}"
+            ) from error
+
+        # ==================================
+        # CLEAN RESPONSE
+        # ==================================
+
+        try:
+
+            text = self._clean_response(text)
+
+        except Exception as error:
+
+            raise ValueError(
+                f"Invalid Gemini response: {error}"
+            ) from error
+
+        # ==================================
+        # JSON PARSING
+        # ==================================
+
+        try:
+
+            plan = json.loads(text)
+
+        except json.JSONDecodeError as error:
+
+            raise ValueError(
+                f"Gemini returned invalid JSON: {error}"
+            ) from error
+
+        # ==================================
+        # PLAN VALIDATION
+        # ==================================
+
+        return self._validate_plan(
+            plan,
+            files
         )
-
-        text = response.text.strip()
-
-        if text.startswith("```json"):
-
-            text = text.replace(
-                "```json",
-                ""
-            )
-
-            text = text.replace(
-                "```",
-                ""
-            )
-
-        elif text.startswith("```"):
-
-            text = text.replace(
-                "```",
-                ""
-            )
-
-        text = text.strip()
-
-        return json.loads(text)
