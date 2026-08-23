@@ -1,22 +1,19 @@
-# Virtual environment
 .venv/
 venv/
 env/
 
-# Python cache
-__pycache__/
-*.py[cod]
-
-# Environment / secrets
 .env
 .env.*
 
-# Logs
 logs/
 
-# Test/cache files
+__pycache__/
+*.py[cod]
+
 .pytest_cache/
 
-# IDE
 .vscode/
 .idea/
+
+.DS_Store
+Thumbs.db
